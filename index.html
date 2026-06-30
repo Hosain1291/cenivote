@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>대체역사 전자투표기 제작소 & 시뮬레이터 Pro</title>
+    <title>전자투표기 제작소 & 시뮬레이터 Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -150,7 +150,7 @@
                     <button id="card-ballot-btn" onclick="insertCard('ballot')" class="flex flex-col items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl transition-all hover:-translate-y-0.5 group relative overflow-hidden opacity-50 cursor-not-allowed" disabled>
                         <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 via-yellow-400 to-red-500"></div>
                         <div class="w-full flex justify-between items-center mt-1 mb-2">
-                            <span class="text-[8px] font-black bg-sky-50 text-slate-950 px-1 py-0.5 rounded font-sans">VOTE</span>
+                            <span class="text-[8px] font-black bg-sky-50 text-slate-950 px-1 py-0.5 rounded font-sans font-bold">VOTE</span>
                             <i class="fa-solid fa-arrow-up text-sky-400 group-hover:animate-bounce"></i>
                         </div>
                         <div class="text-center">
@@ -262,7 +262,7 @@
                             <!-- Interactive Card Slide In Container -->
                             <div id="inserted-card-view" class="absolute inset-y-0 w-3/4 bg-amber-500 text-amber-950 font-bold text-xs flex items-center justify-between px-4 transform translate-y-full transition-transform duration-500 shadow-inner">
                                 <span id="inserted-card-name">CARTE D'INITIALISATION</span>
-                                <button onclick="ejectCard()" class="bg-amber-950 text-white px-2 py-0.5 rounded text-[9px] hover:bg-black transition-colors font-bold">
+                                <button onclick="ejectCard()" class="bg-amber-950 text-white px-2 py-0.5 rounded text-[9px] hover:bg-black transition-colors font-bold font-sans">
                                     <i class="fa-solid fa-arrow-up-from-bracket"></i> 반환
                                 </button>
                             </div>
@@ -337,15 +337,32 @@
                         </div>
                         <div class="grid grid-cols-3 gap-1.5">
                             <input id="new-cand-party" type="text" placeholder="소속 정당" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-[10px] text-white outline-none w-full col-span-2"/>
-                            <button onclick="addCustomCandidate()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold rounded text-[10px] py-1 transition-all">
-                                후보 추가
-                            </button>
                         </div>
-                        <p class="text-[8px] text-slate-500 text-center mt-1">※ 기호 번호 기반 맞춤 프로필 카드가 실시간 생성됩니다.</p>
+                        
+                        <!-- Candidate Photo Input System (Link & File) -->
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] text-slate-400 font-bold block">후보자 사진 등록 (선택)</label>
+                            <input id="new-cand-img-url" type="text" placeholder="외부 이미지 URL 링크 입력" class="w-full bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-[10px] text-white outline-none"/>
+                            <div class="flex items-center justify-between gap-1.5">
+                                <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 rounded px-2 py-1 text-[9px] font-bold cursor-pointer flex-grow text-center border border-slate-700 transition-colors">
+                                    <i class="fa-solid fa-image"></i> 로컬 이미지 파일 선택
+                                    <input id="new-cand-img-file" type="file" accept="image/*" onchange="handleCandidateImageFile(event)" class="hidden"/>
+                                </label>
+                                <button onclick="clearUploadedImage()" id="btn-clear-img" class="bg-red-950 hover:bg-red-900 text-red-400 rounded px-1.5 py-1 text-[9px] font-bold border border-red-900 hidden transition-colors" title="파일 초기화">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                            <p id="img-upload-status" class="text-[8px] text-emerald-400 font-bold hidden text-center animate-pulse">✓ 이미지 파일 로드 완료</p>
+                        </div>
+
+                        <button onclick="addCustomCandidate()" class="w-full bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold rounded text-[10px] py-1.5 transition-all mt-1">
+                            후보 등록 완료
+                        </button>
+                        <p class="text-[8px] text-slate-500 text-center">※ 사진 미등록 시 기호 기반 전용 카드로 자동 대체됩니다.</p>
                     </div>
 
                     <!-- Scrollable list of existing candidates for deletion -->
-                    <div class="max-h-[160px] overflow-y-auto space-y-1.5 pr-1" id="manage-candidate-list">
+                    <div class="max-h-[140px] overflow-y-auto space-y-1.5 pr-1" id="manage-candidate-list">
                         <!-- Injected dynamically -->
                     </div>
                 </div>
@@ -357,6 +374,42 @@
                             <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> 기기 커스터마이징
                         </h3>
                         <span class="text-[8px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">대체역사</span>
+                    </div>
+
+                    <!-- Active Elections Toggle (선거 활성화 필터 설정) -->
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-2">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider border-b border-slate-800 pb-1">활성 선거 종류 설정</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="flex items-center gap-1.5 text-[10px] text-slate-200 cursor-pointer">
+                                <input type="checkbox" id="toggle-elect-pres" checked onchange="toggleElectionCategory('president')" class="rounded bg-slate-900 border-slate-800 text-sky-600 focus:ring-0"/>
+                                <span class="font-bold">대통령</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-[10px] text-slate-200 cursor-pointer">
+                                <input type="checkbox" id="toggle-elect-nat" checked onchange="toggleElectionCategory('deputyNational')" class="rounded bg-slate-900 border-slate-800 text-emerald-600 focus:ring-0"/>
+                                <span class="font-bold">국회</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-[10px] text-slate-200 cursor-pointer">
+                                <input type="checkbox" id="toggle-elect-prov" checked onchange="toggleElectionCategory('deputyProvincial')" class="rounded bg-slate-900 border-slate-800 text-purple-600 focus:ring-0"/>
+                                <span class="font-bold">지방</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Backup Settings Panel (JSON Export/Import) -->
+                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-2">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider border-b border-slate-800 pb-1">데이터 백업 & 동기화 (JSON)</p>
+                        <div class="grid grid-cols-2 gap-2 text-[9px] font-bold">
+                            <button onclick="exportSetupToJSON()" class="py-1.5 px-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1 transition-colors">
+                                <i class="fa-solid fa-file-export"></i> 설정 백업
+                            </button>
+                            <label class="py-1.5 px-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center gap-1 transition-colors text-center cursor-pointer">
+                                <i class="fa-solid fa-file-import"></i> 백업 복원
+                                <input type="file" accept=".json" onchange="importSetupFromJSON(event)" class="hidden"/>
+                            </label>
+                        </div>
+                        <button onclick="exportTallyToJSON()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded text-[9px] transition-all flex items-center justify-center gap-1 border border-slate-700">
+                            <i class="fa-solid fa-square-poll-horizontal text-sky-400"></i> 실시간 득표 데이터만 JSON 저장
+                        </button>
                     </div>
 
                     <!-- Preset Design Settings Panel -->
@@ -566,7 +619,7 @@
                 <circle cx="60" cy="46" r="15" fill="#f8fafc" fill-opacity="0.9" />
                 <path d="M60,66 C43,66 34,77 34,89 L86,89 C88,77 77,66 60,66 Z" fill="#f8fafc" fill-opacity="0.9" />
                 
-                <!-- High contrast Crimson Number Badge -->
+                <!-- High contrast Number Badge -->
                 <rect x="25" y="80" width="70" height="24" rx="6" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
                 <text x="60" y="97" font-family="Chakra Petch, sans-serif" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">N° ${number}</text>
             </svg>
@@ -592,6 +645,13 @@
         let customAuthorityName = "COMMISSION ELECTORALE NATIONALE INDEPENDANTE";
         let customMapImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Flag_map_of_the_Democratic_Republic_of_the_Congo.svg/3840px-Flag_map_of_the_Democratic_Republic_of_the_Congo.svg.png";
         let currentTheme = "blue"; // blue, red, gold, purple
+
+        // Active Elections Toggle Config (User Custom Setting)
+        let activeElections = {
+            president: true,
+            deputyNational: true,
+            deputyProvincial: true
+        };
 
         // Theme configurations
         const themes = {
@@ -675,6 +735,9 @@
         let activeManageTab = 'president';
         let votingSearchTerm = "";
 
+        // Temporary base64 data cache for candidate file upload
+        let tempUploadedImageBase64 = null;
+
         // Statistics Storage (Dynamic object populated as candidates change)
         let voteTally = {
             president: {},
@@ -736,23 +799,6 @@
 
         // Active state of custom settings presets
         let candidates_presets_list = [...userPresets];
-
-        // Real-time Clock
-        function updateClock() {
-            const clockEl = document.getElementById('live-clock');
-            if (clockEl) {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const date = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const sec = String(now.getSeconds()).padStart(2, '0');
-                clockEl.textContent = `TVS v3.00 | ${year}-${month}-${date} ${hours}:${minutes}:${sec}`;
-            }
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
 
         // Right side Dual tab controller
         function changeControlTab(tab) {
@@ -899,11 +945,38 @@
             renderManageList();
         }
 
-        // Add custom candidate in settings panel
+        // Upload local candidate image file handler
+        function handleCandidateImageFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempUploadedImageBase64 = e.target.result;
+                    document.getElementById('img-upload-status').classList.remove('hidden');
+                    document.getElementById('btn-clear-img').classList.remove('hidden');
+                    showToast("이미지 파일이 성공적으로 로드되었습니다.", "success");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Clear uploaded image cache
+        function clearUploadedImage() {
+            playBeep('click');
+            tempUploadedImageBase64 = null;
+            const fileInput = document.getElementById('new-cand-img-file');
+            if (fileInput) fileInput.value = "";
+            document.getElementById('img-upload-status').classList.add('hidden');
+            document.getElementById('btn-clear-img').classList.add('hidden');
+            showToast("업로드된 이미지가 취소되었습니다.");
+        }
+
+        // Add custom candidate in settings panel (Supports external URL link & file uploads)
         function addCustomCandidate() {
             const idEl = document.getElementById('new-cand-id');
             const nameEl = document.getElementById('new-cand-name');
             const partyEl = document.getElementById('new-cand-party');
+            const urlEl = document.getElementById('new-cand-img-url');
 
             const idVal = parseInt(idEl.value, 10);
             const nameVal = nameEl.value.trim();
@@ -921,23 +994,32 @@
                 return;
             }
 
-            const dynamicImage = generateNumberedPhoto(idVal, nameVal);
+            let finalImage = "";
+            if (tempUploadedImageBase64) {
+                finalImage = tempUploadedImageBase64;
+            } else if (urlEl && urlEl.value.trim()) {
+                finalImage = urlEl.value.trim();
+            } else {
+                finalImage = generateNumberedPhoto(idVal, nameVal);
+            }
 
             candidates[activeManageTab].push({
                 id: idVal,
                 name: nameVal,
                 party: partyVal,
-                image: dynamicImage,
+                image: finalImage,
                 description: "유저 추가 후보"
             });
 
-            // Sort by id
+            // Sort by ID
             candidates[activeManageTab].sort((a,b) => a.id - b.id);
             initTallyDB();
 
             idEl.value = '';
             nameEl.value = '';
             partyEl.value = '';
+            if (urlEl) urlEl.value = '';
+            clearUploadedImage();
 
             playBeep('success');
             showToast("선거 명부에 신규 후보가 정식 등록되었습니다.");
@@ -956,6 +1038,165 @@
             candidates[activeManageTab] = candidates[activeManageTab].filter(c => c.id !== id);
             showToast("후보자가 선거 명부에서 영구 삭제되었습니다.");
             renderManageList();
+            renderScreen();
+        }
+
+        // Toggle Active Election Category
+        function toggleElectionCategory(cat) {
+            playBeep('click');
+            const activeCount = Object.values(activeElections).filter(Boolean).length;
+            
+            if (activeElections[cat] && activeCount <= 1) {
+                showToast("최소 한 개의 선거 대분류는 활성화 상태를 유지해야 합니다.", "error");
+                const checkboxId = cat === 'president' ? 'toggle-elect-pres' : cat === 'deputyNational' ? 'toggle-elect-nat' : 'toggle-elect-prov';
+                document.getElementById(checkboxId).checked = true;
+                return;
+            }
+
+            activeElections[cat] = !activeElections[cat];
+            showToast(`${cat === 'president' ? '대통령 선거' : cat === 'deputyNational' ? '국회의원 선거' : '지방의원 선거'}가 ${activeElections[cat] ? '활성화' : '비활성화'}되었습니다.`, "success");
+            renderScreen();
+        }
+
+        // Export Entire Setup Configuration to JSON
+        function exportSetupToJSON() {
+            playBeep('success');
+            const dataStr = JSON.stringify({
+                activeElections,
+                candidates,
+                activeCustomConfig,
+                presets: candidates_presets_list,
+                voteTally,
+                castVotesCount
+            }, null, 2);
+
+            const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${activeCustomConfig.country.replace(/\s+/g, '_')}_setup_backup.json`;
+            link.click();
+            showToast("선거기기 전체 구성 및 집계 데이터가 JSON 파일로 다운로드되었습니다.", "success");
+        }
+
+        // Import Setup Configuration from JSON file
+        function importSetupFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    
+                    if (parsed.activeElections) activeElections = parsed.activeElections;
+                    if (parsed.candidates) {
+                        Object.keys(parsed.candidates).forEach(key => {
+                            candidates[key] = parsed.candidates[key];
+                        });
+                    }
+                    if (parsed.activeCustomConfig) activeCustomConfig = parsed.activeCustomConfig;
+                    if (parsed.presets) candidates_presets_list = parsed.presets;
+                    if (parsed.voteTally) voteTally = parsed.voteTally;
+                    if (parsed.castVotesCount !== undefined) castVotesCount = parsed.castVotesCount;
+
+                    // Sync DOM controls
+                    document.getElementById('toggle-elect-pres').checked = activeElections.president;
+                    document.getElementById('toggle-elect-nat').checked = activeElections.deputyNational;
+                    document.getElementById('toggle-elect-prov').checked = activeElections.deputyProvincial;
+
+                    document.getElementById('custom-country-input').value = activeCustomConfig.country;
+                    document.getElementById('custom-authority-input').value = activeCustomConfig.authority;
+                    document.getElementById('custom-logo-input').value = activeCustomConfig.logo;
+                    document.getElementById('custom-ostitle-input').value = activeCustomConfig.ostitle;
+                    document.getElementById('custom-theme-input').value = activeCustomConfig.theme;
+
+                    // Sync Bezel
+                    document.getElementById('kiosk-brand-logo').textContent = activeCustomConfig.country + ".";
+                    document.getElementById('header-brand-title').textContent = activeCustomConfig.country;
+                    document.getElementById('header-brand-desc').textContent = `${activeCustomConfig.country} - ${activeCustomConfig.authority} 시뮬레이터`;
+                    document.getElementById('ballot-box-counter').innerHTML = `투입된 표 수: <span class="text-sky-400 font-extrabold text-sm">${castVotesCount}표</span>`;
+
+                    playBeep('success');
+                    showToast("JSON 구성 백업 파일 복원이 정상적으로 완료되었습니다!", "success");
+                    renderManageList();
+                    renderSavedPresets();
+                    renderScreen();
+                } catch (err) {
+                    showToast("올바른 기기 JSON 백업 파일이 아닙니다.", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Export Tally Stats only to JSON
+        function exportTallyToJSON() {
+            playBeep('success');
+            const tallyData = JSON.stringify({
+                country: activeCustomConfig.country,
+                authority: activeCustomConfig.authority,
+                timestamp: new Date().toISOString(),
+                totalVotes: castVotesCount,
+                results: voteTally
+            }, null, 2);
+
+            const blob = new Blob([tallyData], { type: 'application/json;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${activeCustomConfig.country.replace(/\s+/g, '_')}_tally_results.json`;
+            link.click();
+            showToast("실시간 득표 집계 수치 보고서가 JSON 파일로 다운로드되었습니다.", "success");
+        }
+
+        // Dynamic Routing steps for Voting Screen based on active categories
+        function goToNextVoteStep(current) {
+            playBeep('click');
+            if (current === 'pres') {
+                if (activeElections.deputyNational) {
+                    machineState = 'ELECT_DEP_NAT';
+                } else if (activeElections.deputyProvincial) {
+                    machineState = 'ELECT_DEP_PROV';
+                } else {
+                    machineState = 'ELECT_CONFIRM';
+                }
+            } else if (current === 'dep_nat') {
+                if (activeElections.deputyProvincial) {
+                    machineState = 'ELECT_DEP_PROV';
+                } else {
+                    machineState = 'ELECT_CONFIRM';
+                }
+            } else if (current === 'dep_prov') {
+                machineState = 'ELECT_CONFIRM';
+            }
+            renderScreen();
+        }
+
+        function goToPrevVoteStep(current) {
+            playBeep('click');
+            if (current === 'dep_nat') {
+                if (activeElections.president) {
+                    machineState = 'ELECT_PRESIDENT';
+                } else {
+                    machineState = 'VOTING_INSERT';
+                }
+            } else if (current === 'dep_prov') {
+                if (activeElections.deputyNational) {
+                    machineState = 'ELECT_DEP_NAT';
+                } else if (activeElections.president) {
+                    machineState = 'ELECT_PRESIDENT';
+                } else {
+                    machineState = 'VOTING_INSERT';
+                }
+            } else if (current === 'confirm') {
+                if (activeElections.deputyProvincial) {
+                    machineState = 'ELECT_DEP_PROV';
+                } else if (activeElections.deputyNational) {
+                    machineState = 'ELECT_DEP_NAT';
+                } else if (activeElections.president) {
+                    machineState = 'ELECT_PRESIDENT';
+                } else {
+                    machineState = 'VOTING_INSERT';
+                }
+            }
             renderScreen();
         }
 
@@ -986,10 +1227,9 @@
         }
         renderManageList();
 
-        // Main Search filter inside voting touch screens
         function updateVotingSearch(val) {
             votingSearchTerm = val.toLowerCase().trim();
-            renderScreen(); // live update candidates filter
+            renderScreen();
         }
 
         // Dynamic render of LCD screen based on state
@@ -1178,32 +1418,29 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-1.5 mb-2 gap-2">
                             <div>
                                 <h3 class="text-xs font-black text-slate-800 flex items-center gap-1">
-                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 1/3</span>
+                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 1</span>
                                     ÉLECTION PRÉSIDENTIELLE (대통령 선거)
                                 </h3>
                             </div>
                             
-                            <!-- Filter Input to mimic actual massive matrix system -->
                             <div class="flex items-center gap-1.5 w-full sm:w-auto">
                                 <input type="text" placeholder="후보 이름/번호 검색" value="${votingSearchTerm}" oninput="updateVotingSearch(this.value)" class="bg-white border border-slate-300 rounded px-2 py-0.5 text-[9px] outline-none text-slate-800 placeholder-slate-400 w-full sm:w-36"/>
-                                <button onclick="quickSelectByNumber('pres')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-keyboard"></i> 직접 기입
+                                <button onclick="quickSelectByNumber('pres')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0 font-sans">
+                                    <i class="fa-solid fa-keyboard"></i> 직접 입력
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Dense Grid layout of candidates representing crowded ballots -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-1.5 overflow-y-auto max-h-[190px] pr-1 flex-grow">
                             ${candidateCards ? candidateCards : `<div class="col-span-full text-center text-xs text-slate-400 py-6">검색과 일치하는 후보가 없습니다.</div>`}
                         </div>
 
-                        <!-- Bottom Navigation for Voting -->
                         <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
-                            <span class="text-[10px] text-slate-500">
-                                선택된 후보: <strong class="${t.text} text-xs">${selectedPresident ? `${selectedPresident.name} (N° ${selectedPresident.id})` : "없음"}</strong>
+                            <span class="text-[10px] text-slate-500 font-sans">
+                                선택된 후보: <strong class="${t.text} text-xs font-bold">${selectedPresident ? `${selectedPresident.name} (N° ${selectedPresident.id})` : "없음"}</strong>
                             </span>
-                            <button onclick="goToVoteStep('dep_nat')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow" ${!selectedPresident ? 'disabled' : ''}>
-                                다음 단계 (National) <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            <button onclick="goToNextVoteStep('pres')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow font-sans" ${!selectedPresident ? 'disabled' : ''}>
+                                다음 선거 단계 <i class="fa-solid fa-arrow-right text-[8px]"></i>
                             </button>
                         </div>
                     </div>
@@ -1241,15 +1478,15 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-1.5 mb-2 gap-2">
                             <div>
                                 <h3 class="text-xs font-black text-slate-800 flex items-center gap-1">
-                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 2/3</span>
+                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 2</span>
                                     ÉLECTION DÉPUTÉ NATIONAL (국회의원 선거)
                                 </h3>
                             </div>
                             
                             <div class="flex items-center gap-1.5 w-full sm:w-auto">
                                 <input type="text" placeholder="후보 이름/번호 검색" value="${votingSearchTerm}" oninput="updateVotingSearch(this.value)" class="bg-white border border-slate-300 rounded px-2 py-0.5 text-[9px] outline-none text-slate-800 placeholder-slate-400 w-full sm:w-36"/>
-                                <button onclick="quickSelectByNumber('dep_nat')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-keyboard"></i> 직접 기입
+                                <button onclick="quickSelectByNumber('dep_nat')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0 font-sans">
+                                    <i class="fa-solid fa-keyboard"></i> 직접 입력
                                 </button>
                             </div>
                         </div>
@@ -1259,14 +1496,14 @@
                         </div>
 
                         <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
-                            <button onclick="goToVoteStep('pres')" class="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded border border-slate-300 transition-all flex items-center gap-1">
+                            <button onclick="goToPrevVoteStep('dep_nat')" class="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded border border-slate-300 transition-all flex items-center gap-1 font-sans">
                                 <i class="fa-solid fa-arrow-left"></i> 이전
                             </button>
-                            <span class="text-[10px] text-slate-500">
-                                선택된 후보: <strong class="${t.text} text-xs">${selectedDepNat ? `${selectedDepNat.name} (N° ${selectedDepNat.id})` : "없음"}</strong>
+                            <span class="text-[10px] text-slate-500 font-sans">
+                                선택된 후보: <strong class="${t.text} text-xs font-bold">${selectedDepNat ? `${selectedDepNat.name} (N° ${selectedDepNat.id})` : "없음"}</strong>
                             </span>
-                            <button onclick="goToVoteStep('dep_prov')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow" ${!selectedDepNat ? 'disabled' : ''}>
-                                다음 단계 (Provincial) <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            <button onclick="goToNextVoteStep('dep_nat')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow font-sans" ${!selectedDepNat ? 'disabled' : ''}>
+                                다음 선거 단계 <i class="fa-solid fa-arrow-right text-[8px]"></i>
                             </button>
                         </div>
                     </div>
@@ -1304,15 +1541,15 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-1.5 mb-2 gap-2">
                             <div>
                                 <h3 class="text-xs font-black text-slate-800 flex items-center gap-1">
-                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 3/3</span>
+                                    <span class="${t.accent} text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Étape 3</span>
                                     ÉLECTION DÉPUTÉ PROVINCIAL (지방의원 선거)
                                 </h3>
                             </div>
                             
                             <div class="flex items-center gap-1.5 w-full sm:w-auto">
                                 <input type="text" placeholder="후보 이름/번호 검색" value="${votingSearchTerm}" oninput="updateVotingSearch(this.value)" class="bg-white border border-slate-300 rounded px-2 py-0.5 text-[9px] outline-none text-slate-800 placeholder-slate-400 w-full sm:w-36"/>
-                                <button onclick="quickSelectByNumber('dep_prov')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-keyboard"></i> 직접 기입
+                                <button onclick="quickSelectByNumber('dep_prov')" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 font-bold rounded border border-slate-200 flex items-center gap-1 shrink-0 font-sans">
+                                    <i class="fa-solid fa-keyboard"></i> 직접 입력
                                 </button>
                             </div>
                         </div>
@@ -1322,13 +1559,13 @@
                         </div>
 
                         <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
-                            <button onclick="goToVoteStep('dep_nat')" class="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded border border-slate-300 transition-all flex items-center gap-1">
+                            <button onclick="goToPrevVoteStep('dep_prov')" class="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] rounded border border-slate-300 transition-all flex items-center gap-1 font-sans">
                                 <i class="fa-solid fa-arrow-left"></i> 이전
                             </button>
-                            <span class="text-[10px] text-slate-500">
-                                선택된 후보: <strong class="${t.text} text-xs">${selectedDepProv ? `${selectedDepProv.name} (N° ${selectedDepProv.id})` : "없음"}</strong>
+                            <span class="text-[10px] text-slate-500 font-sans">
+                                선택된 후보: <strong class="${t.text} text-xs font-bold">${selectedDepProv ? `${selectedDepProv.name} (N° ${selectedDepProv.id})` : "없음"}</strong>
                             </span>
-                            <button onclick="goToVoteStep('confirm')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow" ${!selectedDepProv ? 'disabled' : ''}>
+                            <button onclick="goToNextVoteStep('dep_prov')" class="py-1.5 px-4 ${t.accent} hover:${t.hover} disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold text-[10px] rounded transition-all flex items-center gap-1 shadow font-sans" ${!selectedDepProv ? 'disabled' : ''}>
                                 최종 확인 <i class="fa-solid fa-circle-check text-[8px]"></i>
                             </button>
                         </div>
@@ -1337,6 +1574,62 @@
             }
             else if (machineState === 'ELECT_CONFIRM') {
                 guide.textContent = "안내: 투표 후보 최종 선택 검토";
+
+                // Count active categories to dynamically adjust grids
+                const activeCount = Object.values(activeElections).filter(Boolean).length;
+                let confirmCardsHtml = "";
+
+                if (activeElections.president) {
+                    confirmCardsHtml += `
+                    <!-- Pres -->
+                    <div class="${t.lightBg} border ${t.border} rounded-lg p-2.5 flex flex-col justify-between">
+                        <span class="text-[8px] font-bold ${t.text} bg-slate-200 px-1.5 py-0.5 rounded w-fit uppercase">1. Président</span>
+                        <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedPresident?.name || '기권 / 투표 안함'}</h4>
+                        <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
+                            <span>기호: <strong>N° ${selectedPresident?.id || '99'}</strong></span>
+                            <span>${selectedPresident?.party || '기권'}</span>
+                        </div>
+                        <button onclick="goToVoteStep('pres')" class="text-right text-[9px] ${t.text} hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold font-sans">
+                            <i class="fa-solid fa-pen text-[8px]"></i> 수정
+                        </button>
+                    </div>
+                    `;
+                }
+
+                if (activeElections.deputyNational) {
+                    confirmCardsHtml += `
+                    <!-- Dep Nat -->
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5 flex flex-col justify-between">
+                        <span class="text-[8px] font-bold text-emerald-800 bg-emerald-200 px-1.5 py-0.5 rounded w-fit uppercase">2. Député National</span>
+                        <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedDepNat?.name || '기권 / 투표 안함'}</h4>
+                        <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
+                            <span>기호: <strong>N° ${selectedDepNat?.id || '99'}</strong></span>
+                            <span>${selectedDepNat?.party || '기권'}</span>
+                        </div>
+                        <button onclick="goToVoteStep('dep_nat')" class="text-right text-[9px] text-emerald-600 hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold font-sans">
+                            <i class="fa-solid fa-pen text-[8px]"></i> 수정
+                        </button>
+                    </div>
+                    `;
+                }
+
+                if (activeElections.deputyProvincial) {
+                    confirmCardsHtml += `
+                    <!-- Dep Prov -->
+                    <div class="bg-purple-50 border border-purple-100 rounded-lg p-2.5 flex flex-col justify-between">
+                        <span class="text-[8px] font-bold text-purple-800 bg-purple-200 px-1.5 py-0.5 rounded w-fit uppercase">3. Député Provincial</span>
+                        <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedDepProv?.name || '기권 / 투표 안함'}</h4>
+                        <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
+                            <span>기호: <strong>N° ${selectedDepProv?.id || '99'}</strong></span>
+                            <span>${selectedDepProv?.party || '기권'}</span>
+                        </div>
+                        <button onclick="goToVoteStep('dep_prov')" class="text-right text-[9px] text-purple-600 hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold font-sans">
+                            <i class="fa-solid fa-pen text-[8px]"></i> 수정
+                        </button>
+                    </div>
+                    `;
+                }
+
                 container.innerHTML = `
                     <div class="flex flex-col h-full">
                         <div class="border-b border-slate-200 pb-1.5 mb-2">
@@ -1347,56 +1640,19 @@
                             <p class="text-[9px] text-slate-500 mt-0.5">선택하신 최종 후보들을 검토한 뒤 인쇄(Imprimer)를 누르십시오.</p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 my-auto">
-                            <!-- Pres -->
-                            <div class="${t.lightBg} border ${t.border} rounded-lg p-2.5 flex flex-col justify-between">
-                                <span class="text-[8px] font-bold ${t.text} bg-slate-200 px-1.5 py-0.5 rounded w-fit uppercase">1. Président</span>
-                                <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedPresident?.name}</h4>
-                                <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
-                                    <span>기호: <strong>N° ${selectedPresident?.id}</strong></span>
-                                    <span>${selectedPresident?.party}</span>
-                                </div>
-                                <button onclick="goToVoteStep('pres')" class="text-right text-[9px] ${t.text} hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold">
-                                    <i class="fa-solid fa-pen text-[8px]"></i> 수정
-                                </button>
-                            </div>
-
-                            <!-- Dep Nat -->
-                            <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5 flex flex-col justify-between">
-                                <span class="text-[8px] font-bold text-emerald-800 bg-emerald-200 px-1.5 py-0.5 rounded w-fit uppercase">2. Député National</span>
-                                <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedDepNat?.name}</h4>
-                                <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
-                                    <span>기호: <strong>N° ${selectedDepNat?.id}</strong></span>
-                                    <span>${selectedDepNat?.party}</span>
-                                </div>
-                                <button onclick="goToVoteStep('dep_nat')" class="text-right text-[9px] text-emerald-600 hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold">
-                                    <i class="fa-solid fa-pen text-[8px]"></i> 수정
-                                </button>
-                            </div>
-
-                            <!-- Dep Prov -->
-                            <div class="bg-purple-50 border border-purple-100 rounded-lg p-2.5 flex flex-col justify-between">
-                                <span class="text-[8px] font-bold text-purple-800 bg-purple-200 px-1.5 py-0.5 rounded w-fit uppercase">3. Député Provincial</span>
-                                <h4 class="text-xs font-black text-slate-900 mt-1.5">${selectedDepProv?.name}</h4>
-                                <div class="flex justify-between items-center text-[9px] text-slate-500 mt-1.5">
-                                    <span>기호: <strong>N° ${selectedDepProv?.id}</strong></span>
-                                    <span>${selectedDepProv?.party}</span>
-                                </div>
-                                <button onclick="goToVoteStep('dep_prov')" class="text-right text-[9px] text-purple-600 hover:underline mt-1.5 flex items-center gap-1 justify-end font-bold">
-                                    <i class="fa-solid fa-pen text-[8px]"></i> 수정
-                                </button>
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-${activeCount} gap-2 my-auto">
+                            ${confirmCardsHtml}
                         </div>
 
                         <!-- Printing and confirmation triggers -->
                         <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
-                            <button onclick="resetVoteChoices()" class="py-1 px-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-[10px] rounded border border-red-200 transition-all">
+                            <button onclick="resetVoteChoices()" class="py-1 px-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-[10px] rounded border border-red-200 transition-all font-sans">
                                 <i class="fa-solid fa-trash-can"></i> 전체 리셋
                             </button>
-                            <p class="text-[9px] text-slate-400 max-w-[240px] leading-tight">
+                            <p class="text-[9px] text-slate-400 max-w-[240px] leading-tight font-sans">
                                 <i class="fa-solid fa-triangle-exclamation text-yellow-500"></i> 인쇄 버튼을 누르면 기기 내부 기록과 영수증에 동시 각인됩니다.
                             </p>
-                            <button onclick="triggerPrintVote()" class="py-2 px-6 ${t.accent} hover:${t.hover} text-white font-black text-[11px] rounded-lg shadow transition-all flex items-center gap-1.5 uppercase">
+                            <button onclick="triggerPrintVote()" class="py-2 px-6 ${t.accent} hover:${t.hover} text-white font-black text-[11px] rounded-lg shadow transition-all flex items-center gap-1.5 uppercase font-sans">
                                 <i class="fa-solid fa-print"></i> Imprimer (인쇄)
                             </button>
                         </div>
@@ -1435,17 +1691,43 @@
             else if (machineState === 'CLOSED') {
                 guide.textContent = "안내: 투표 공식 마감 및 집계표 출력 완료";
                 
-                let presResults = Object.entries(voteTally.president)
-                    .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-sky-600">${count}표</span></div>`)
-                    .join('');
+                let presResults = "";
+                if (activeElections.president) {
+                    let presRows = Object.entries(voteTally.president)
+                        .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-sky-600">${count}표</span></div>`)
+                        .join('');
+                    presResults = `
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
+                        <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-sky-700">PRÉSIDENTIELLE</h4>
+                        ${presRows || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
+                    </div>`;
+                }
 
-                let natResults = Object.entries(voteTally.deputyNational)
-                    .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-emerald-600">${count}표</span></div>`)
-                    .join('');
+                let natResults = "";
+                if (activeElections.deputyNational) {
+                    let natRows = Object.entries(voteTally.deputyNational)
+                        .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-emerald-600">${count}표</span></div>`)
+                        .join('');
+                    natResults = `
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
+                        <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-emerald-700">DÉPUTÉ NATIONAL</h4>
+                        ${natRows || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
+                    </div>`;
+                }
 
-                let provResults = Object.entries(voteTally.deputyProvincial)
-                    .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-purple-600">${count}표</span></div>`)
-                    .join('');
+                let provResults = "";
+                if (activeElections.deputyProvincial) {
+                    let provRows = Object.entries(voteTally.deputyProvincial)
+                        .map(([name, count]) => `<div class="flex justify-between text-[11px] py-1 border-b border-slate-100"><span>${name}</span><span class="font-bold text-purple-600">${count}표</span></div>`)
+                        .join('');
+                    provResults = `
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
+                        <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-purple-700">DÉPUTÉ PROVINCIAL</h4>
+                        ${provRows || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
+                    </div>`;
+                }
+
+                const activeCount = Object.values(activeElections).filter(Boolean).length;
 
                 container.innerHTML = `
                     <div class="flex flex-col h-full overflow-y-auto pr-1">
@@ -1460,19 +1742,10 @@
                             <span class="bg-red-100 text-red-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded">CLOSED</span>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 flex-grow my-auto">
-                            <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
-                                <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-sky-700">PRÉSIDENTIELLE</h4>
-                                ${presResults || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
-                            </div>
-                            <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
-                                <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-emerald-700">DÉPUTÉ NATIONAL</h4>
-                                ${natResults || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
-                            </div>
-                            <div class="bg-slate-50 p-2 rounded border border-slate-200 max-h-[140px] overflow-y-auto">
-                                <h4 class="text-[10px] font-black text-slate-900 border-b pb-0.5 mb-1 text-purple-700">DÉPUTÉ PROVINCIAL</h4>
-                                ${provResults || '<div class="text-[9px] text-slate-400">득표 없음</div>'}
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-${activeCount} gap-2.5 flex-grow my-auto">
+                            ${presResults}
+                            ${natResults}
+                            ${provResults}
                         </div>
 
                         <div class="mt-3 pt-2 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2">
@@ -1481,10 +1754,10 @@
                                 <p>서버 통신 상태: <strong class="text-emerald-600 font-bold">CONNECTED (SAT)</strong></p>
                             </div>
                             <div class="flex gap-1.5 w-full sm:w-auto justify-end">
-                                <button onclick="triggerPrintTallyReceipt()" class="py-1 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-[10px] rounded flex items-center gap-1 border border-slate-700">
+                                <button onclick="triggerPrintTallyReceipt()" class="py-1 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-[10px] rounded flex items-center gap-1 border border-slate-700 font-sans">
                                     <i class="fa-solid fa-print text-sky-400"></i> 집계표 영수증 인쇄
                                 </button>
-                                <button onclick="transmitResults()" class="py-1 px-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] rounded flex items-center gap-1">
+                                <button onclick="transmitResults()" class="py-1 px-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] rounded flex items-center gap-1 font-sans">
                                     <i class="fa-solid fa-satellite-dish"></i> 본부 송신
                                 </button>
                             </div>
@@ -1541,9 +1814,17 @@
                 
                 showToast("투표용지가 정밀 인식되었습니다. 화면 터치 입력을 시작합니다.", "success");
                 
-                // Transition to presidential election step and clear search filters
+                // Transition to first active election step and clear search filters
                 votingSearchTerm = "";
-                machineState = 'ELECT_PRESIDENT';
+                if (activeElections.president) {
+                    machineState = 'ELECT_PRESIDENT';
+                } else if (activeElections.deputyNational) {
+                    machineState = 'ELECT_DEP_NAT';
+                } else if (activeElections.deputyProvincial) {
+                    machineState = 'ELECT_DEP_PROV';
+                } else {
+                    machineState = 'ELECT_CONFIRM';
+                }
                 updateInstructions(4);
             } 
             else if (color === 'red') {
@@ -1726,6 +2007,7 @@
             const receipt = document.getElementById('inspect-receipt-container');
             const actions = document.getElementById('inspect-modal-actions');
 
+            if (!modal) return;
             modal.classList.remove('hidden');
 
             if (printedPaperType === 'ballot') {
@@ -1735,6 +2017,44 @@
                 const fallbackPresImg = generateNumberedPhoto(selectedPresident ? selectedPresident.id : 0, '');
                 const fallbackNatImg = generateNumberedPhoto(selectedDepNat ? selectedDepNat.id : 0, '');
                 const fallbackProvImg = generateNumberedPhoto(selectedDepProv ? selectedDepProv.id : 0, '');
+
+                let ballotRowsHtml = "";
+
+                if (activeElections.president) {
+                    ballotRowsHtml += `
+                    <div class="flex items-start gap-2 border-b border-dashed border-slate-200 pb-1.5">
+                        <img src="${selectedPresident ? selectedPresident.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackPresImg}'"/>
+                        <div>
+                            <span class="text-[8px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-sans font-bold">1. PRESIDENTIELLE</span>
+                            <p class="font-bold text-slate-900 mt-0.5">${selectedPresident ? `${selectedPresident.name} (N° ${selectedPresident.id})` : "백지 투표 / 기권"}</p>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                if (activeElections.deputyNational) {
+                    ballotRowsHtml += `
+                    <div class="flex items-start gap-2 border-b border-dashed border-slate-200 pb-1.5">
+                        <img src="${selectedDepNat ? selectedDepNat.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackNatImg}'"/>
+                        <div>
+                            <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-sans font-bold">2. DEPUTE NATIONAL</span>
+                            <p class="font-bold text-slate-900 mt-0.5">${selectedDepNat ? `${selectedDepNat.name} (N° ${selectedDepNat.id})` : "백지 투표 / 기권"}</p>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                if (activeElections.deputyProvincial) {
+                    ballotRowsHtml += `
+                    <div class="flex items-start gap-2">
+                        <img src="${selectedDepProv ? selectedDepProv.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackProvImg}'"/>
+                        <div>
+                            <span class="text-[8px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-sans font-bold">3. DEPUTE PROVINCIAL</span>
+                            <p class="font-bold text-slate-900 mt-0.5">${selectedDepProv ? `${selectedDepProv.name} (N° ${selectedDepProv.id})` : "백지 투표 / 기권"}</p>
+                        </div>
+                    </div>
+                    `;
+                }
 
                 receipt.innerHTML = `
                     <div class="border-b-2 border-dashed border-slate-300 pb-2 text-center">
@@ -1754,27 +2074,7 @@
                     </div>
 
                     <div class="border-t border-dashed border-slate-300 pt-2 space-y-2">
-                        <div class="flex items-start gap-2">
-                            <img src="${selectedPresident ? selectedPresident.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackPresImg}'"/>
-                            <div>
-                                <span class="text-[8px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-sans font-bold">1. PRESIDENTIELLE</span>
-                                <p class="font-bold text-slate-900 mt-0.5">${selectedPresident ? `${selectedPresident.name} (N° ${selectedPresident.id})` : "백지 투표 / 기권"}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <img src="${selectedDepNat ? selectedDepNat.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackNatImg}'"/>
-                            <div>
-                                <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-sans font-bold">2. DEPUTE NATIONAL</span>
-                                <p class="font-bold text-slate-900 mt-0.5">${selectedDepNat ? `${selectedDepNat.name} (N° ${selectedDepNat.id})` : "백지 투표 / 기권"}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <img src="${selectedDepProv ? selectedDepProv.image : generateVoteBlancPhoto()}" class="w-8 h-8 rounded-full object-cover border border-slate-300 bg-slate-200" onerror="this.onerror=null; this.src='${fallbackProvImg}'"/>
-                            <div>
-                                <span class="text-[8px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-sans font-bold">3. DEPUTE PROVINCIAL</span>
-                                <p class="font-bold text-slate-900 mt-0.5">${selectedDepProv ? `${selectedDepProv.name} (N° ${selectedDepProv.id})` : "백지 투표 / 기권"}</p>
-                            </div>
-                        </div>
+                        ${ballotRowsHtml}
                     </div>
 
                     <div class="border-t-2 border-dashed border-slate-300 pt-2 text-center text-[8px] text-slate-400">
@@ -1784,7 +2084,7 @@
                 `;
 
                 actions.innerHTML = `
-                    <button onclick="castBallotIntoBox()" class="w-full bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-black py-2 px-4 rounded-lg shadow transition-all flex items-center justify-center gap-1.5 text-xs">
+                    <button onclick="castBallotIntoBox()" class="w-full bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-black py-2 px-4 rounded-lg shadow transition-all flex items-center justify-center gap-1.5 text-xs font-sans">
                         <i class="fa-solid fa-box-open"></i> 투표함 투입하기 (Glisser dans l'urne)
                     </button>
                 `;
@@ -1793,12 +2093,38 @@
                 subtitle.textContent = "공식 집계표 출력물 검증 (Rapport)";
                 guide.textContent = "기기가 최종 종료되어 계산 및 각인된 실시간 투표 집계 용지입니다.";
 
-                let presRows = Object.entries(voteTally.president)
-                    .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
-                let natRows = Object.entries(voteTally.deputyNational)
-                    .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
-                let provRows = Object.entries(voteTally.deputyProvincial)
-                    .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
+                let presSectionHtml = "";
+                if (activeElections.president) {
+                    let presRows = Object.entries(voteTally.president)
+                        .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
+                    presSectionHtml = `
+                    <div>
+                        <span class="text-[8px] bg-sky-100 text-sky-800 px-1 py-0.5 rounded font-bold font-sans">PRÉSIDENTIELLE RESULTS</span>
+                        <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${presRows}</div>
+                    </div>`;
+                }
+
+                let natSectionHtml = "";
+                if (activeElections.deputyNational) {
+                    let natRows = Object.entries(voteTally.deputyNational)
+                        .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
+                    natSectionHtml = `
+                    <div>
+                        <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-bold font-sans">DÉPUTÉ NATIONAL RESULTS</span>
+                        <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${natRows}</div>
+                    </div>`;
+                }
+
+                let provSectionHtml = "";
+                if (activeElections.deputyProvincial) {
+                    let provRows = Object.entries(voteTally.deputyProvincial)
+                        .map(([name, count]) => `<div class="flex justify-between py-0.5 border-b border-slate-200"><span>${name}</span><strong>${count}표</strong></div>`).join('');
+                    provSectionHtml = `
+                    <div>
+                        <span class="text-[8px] bg-purple-100 text-purple-800 px-1 py-0.5 rounded font-bold font-sans">DÉPUTÉ PROVINCIAL RESULTS</span>
+                        <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${provRows}</div>
+                    </div>`;
+                }
 
                 receipt.innerHTML = `
                     <div class="border-b-2 border-dashed border-slate-300 pb-2 text-center">
@@ -1813,18 +2139,9 @@
                     </div>
 
                     <div class="border-t border-dashed border-slate-300 pt-2 space-y-3 text-[10px]">
-                        <div>
-                            <span class="text-[8px] bg-sky-100 text-sky-800 px-1 py-0.5 rounded font-bold font-sans">PRÉSIDENTIELLE RESULTS</span>
-                            <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${presRows}</div>
-                        </div>
-                        <div>
-                            <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-bold font-sans">DÉPUTÉ NATIONAL RESULTS</span>
-                            <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${natRows}</div>
-                        </div>
-                        <div>
-                            <span class="text-[8px] bg-purple-100 text-purple-800 px-1 py-0.5 rounded font-bold font-sans">DÉPUTÉ PROVINCIAL RESULTS</span>
-                            <div class="mt-1 pl-1 space-y-0.5 text-slate-700 font-mono">${provRows}</div>
-                        </div>
+                        ${presSectionHtml}
+                        ${natSectionHtml}
+                        ${provSectionHtml}
                     </div>
 
                     <div class="border-t-2 border-dashed border-slate-300 pt-2 text-center text-[8px] text-slate-400">
@@ -1834,7 +2151,7 @@
                 `;
 
                 actions.innerHTML = `
-                    <button onclick="saveTallyAsFile()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black py-2 px-4 rounded-lg shadow transition-all flex items-center justify-center gap-1.5 text-xs">
+                    <button onclick="saveTallyAsFile()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black py-2 px-4 rounded-lg shadow transition-all flex items-center justify-center gap-1.5 text-xs font-sans">
                         <i class="fa-solid fa-download"></i> 집계 결과 영수증 저장 (Save)
                     </button>
                 `;
@@ -1844,7 +2161,7 @@
         function closeInspectModal() {
             playBeep('click');
             const modal = document.getElementById('ballot-inspect-modal');
-            modal.classList.add('hidden');
+            if (modal) modal.classList.add('hidden');
         }
 
         // Dropping the paper into physical glass urn
@@ -1854,13 +2171,15 @@
             
             // Revert physical slot paper
             const paperOutput = document.getElementById('printed-ballot-output');
-            paperOutput.classList.add('hidden');
-            paperOutput.classList.remove('printed-paper-anim');
+            if (paperOutput) {
+                paperOutput.classList.add('hidden');
+                paperOutput.classList.remove('printed-paper-anim');
+            }
 
             // Save actual statistics tally
-            if (selectedPresident) voteTally.president[selectedPresident.name]++;
-            if (selectedDepNat) voteTally.deputyNational[selectedDepNat.name]++;
-            if (selectedDepProv) voteTally.deputyProvincial[selectedDepProv.name]++;
+            if (selectedPresident && activeElections.president) voteTally.president[selectedPresident.name]++;
+            if (selectedDepNat && activeElections.deputyNational) voteTally.deputyNational[selectedDepNat.name]++;
+            if (selectedDepProv && activeElections.deputyProvincial) voteTally.deputyProvincial[selectedDepProv.name]++;
 
             // Increment ballot box counter
             castVotesCount++;
@@ -1889,11 +2208,13 @@
             content += `총 처리 투표용지 수: ${castVotesCount}\n\n`;
 
             ['president', 'deputyNational', 'deputyProvincial'].forEach(cat => {
-                content += `[${cat.toUpperCase()}]\n`;
-                Object.entries(voteTally[cat]).forEach(([name, count]) => {
-                    content += `${name}: ${count}표\n`;
-                });
-                content += `\n`;
+                if (activeElections[cat]) {
+                    content += `[${cat.toUpperCase()}]\n`;
+                    Object.entries(voteTally[cat]).forEach(([name, count]) => {
+                        content += `${name}: ${count}표\n`;
+                    });
+                    content += `\n`;
+                }
             });
 
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -1937,7 +2258,7 @@
             } else if (step === 4) {
                 container.innerHTML = `
                     <p class="font-semibold text-sky-300 text-sm">4단계: 선거별 후보 터치 마킹</p>
-                    <p>화면에 배치된 후보 명부에서 한 명씩 선택하십시오. (대통령 국회의원 지방의원 순)</p>
+                    <p>화면에 배치된 후보 명부에서 한 명씩 선택하십시오. (활성 설정된 선거 종류 순서대로 진행)</p>
                     <p class="text-slate-400 text-[11px] mt-1">상단의 <strong>실시간 검색바</strong>를 이용해 대량의 후보 속에서 이름 혹은 기호 번호로 검색 마킹이 가능합니다.</p>
                 `;
             } else if (step === 5) {
@@ -2007,6 +2328,9 @@
             document.getElementById('card-ballot-btn').setAttribute('disabled', 'true');
             document.getElementById('card-red-btn').classList.add('opacity-50', 'cursor-not-allowed');
             document.getElementById('card-red-btn').setAttribute('disabled', 'true');
+
+            // Reset image upload file status
+            clearUploadedImage();
 
             updateInstructions(1);
             renderScreen();
